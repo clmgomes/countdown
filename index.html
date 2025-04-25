@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown to New Year</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .year-progress {
+            height: 12px;
+            background-color: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #64748b, #334155);
+            transition: width 0.5s ease;
+        }
+        
+        .time-unit {
+            transition: all 0.3s ease;
+        }
+        
+        .time-unit:hover {
+            transform: translateY(-4px);
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 8px rgba(100, 116, 139, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+    <div class="w-full max-w-md px-4">
+        <div class="bg-white rounded-xl shadow-sm p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-light text-gray-800 mb-1">How much time is left</h1>
+				<h2 class="text-4xl font-bold text-gray-900">in this year?</h2>
+				<br>
+				<span id="next-year" class="text-slate-600"></span></h2>
+            </div>
+            
+            <div class="mb-8">
+                <div class="flex justify-between text-sm text-slate-500 mb-2">
+                    <span>Year progress</span>
+                    <span id="percentage">0%</span>
+                </div>
+                <div class="year-progress mb-1">
+                    <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="text-xs text-right text-slate-400" id="time-elapsed">0 days elapsed</div>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-3 mb-8">
+                <div class="time-unit bg-slate-800 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-white" id="days">00</div>
+                    <div class="text-xs text-slate-300 mt-1">Days</div>
+                </div>
+                
+                <div class="time-unit bg-slate-700 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-white" id="hours">00</div>
+                    <div class="text-xs text-slate-300 mt-1">Hours</div>
+                </div>
+                
+                <div class="time-unit bg-slate-600 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-white" id="minutes">00</div>
+                    <div class="text-xs text-slate-300 mt-1">Minutes</div>
+                </div>
+                
+                <div class="time-unit bg-slate-500 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-white" id="seconds">00</div>
+                    <div class="text-xs text-slate-300 mt-1">Seconds</div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <div class="inline-block px-4 py-2 rounded-full bg-slate-100 text-slate-700 text-sm">
+                    <span id="countdown-text">Counting down...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-6 text-center text-xs text-slate-400">
+            <div id="current-date-time" class="inline-block px-3 py-1 rounded-full bg-slate-100"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+			
+            // Update current date and time
+            function updateCurrentDateTime() {
+                const now = new Date();
+                const options = { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                const dateTimeString = now.toLocaleDateString('en-US', options);
+                document.getElementById('current-date-time').textContent = dateTimeString;
+            }
+            
+            setInterval(updateCurrentDateTime, 1000);
+            updateCurrentDateTime();
+            
+            // Countdown function
+            function updateCountdown() {
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const newYear = new Date(`January 1, ${currentYear + 1} 00:00:00`);
+                const diff = newYear - now;
+                
+                if (diff <= 0) {
+                    // Happy New Year!
+                    document.getElementById('days').textContent = '00';
+                    document.getElementById('hours').textContent = '00';
+                    document.getElementById('minutes').textContent = '00';
+                    document.getElementById('seconds').textContent = '00';
+                    document.getElementById('countdown-text').textContent = 'Happy New Year!';
+                    document.getElementById('progress-fill').style.width = '100%';
+                    document.getElementById('percentage').textContent = '100%';
+                    document.getElementById('time-elapsed').textContent = '365 days elapsed';
+                    return;
+                }
+                
+                // Calculate time units
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                // Update display
+                document.getElementById('days').textContent = days.toString().padStart(2, '0');
+                document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+                document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+                
+                // Calculate percentage of year passed
+                const startOfYear = new Date(`January 1, ${currentYear} 00:00:00`);
+                const endOfYear = new Date(`January 1, ${currentYear + 1} 00:00:00`);
+                const totalYearDuration = endOfYear - startOfYear;
+                const timePassed = now - startOfYear;
+                const percentage = (timePassed / totalYearDuration) * 100;
+                const daysElapsed = Math.floor(timePassed / (1000 * 60 * 60 * 24));
+                
+                document.getElementById('progress-fill').style.width = `${percentage}%`;
+                document.getElementById('percentage').textContent = `${Math.round(percentage)}%`;
+                document.getElementById('time-elapsed').textContent = `${daysElapsed} days elapsed`;
+                
+                // Update countdown text based on time remaining
+                if (days < 7) {
+                    document.getElementById('countdown-text').textContent = 'Final week!';
+                } else if (days < 30) {
+                    document.getElementById('countdown-text').textContent = 'Less than a month left';
+                } else {
+                    document.getElementById('countdown-text').textContent = 'Counting down...';
+                }
+            }
+            
+            setInterval(updateCountdown, 1000);
+            updateCountdown();
+        });
+    </script>
+</body>
+</html>
